@@ -3,7 +3,8 @@
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.8" />
+    <PackageReference Include="Alexa.NET" Version="1.5.3" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.13" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
