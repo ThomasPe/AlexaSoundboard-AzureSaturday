@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "name": "myQueueItem",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "soundsearch",
+      "connection": "alexasoundboard_STORAGE"
+    }
+  ],
+  "disabled": false
+}

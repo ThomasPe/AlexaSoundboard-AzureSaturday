@@ -1,0 +1,19 @@
+{
+  "bindings": [
+    {
+      "name": "myBlob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "files-to-process/{name}",
+      "connection": "alexasoundboard_STORAGE"
+    },
+    {
+      "type": "blob",
+      "name": "outblob",
+      "path": "processed/{filename}",
+      "connection": "alexasoundboard_STORAGE",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}
