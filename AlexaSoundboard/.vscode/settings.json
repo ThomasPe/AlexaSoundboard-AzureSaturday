@@ -1,6 +1,6 @@
 {
-  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectLanguage": "C#Script",
   "azureFunctions.projectRuntime": "~1",
-  "azureFunctions.templateFilter": "Verified",
+  "azureFunctions.templateFilter": "All",
   "azureFunctions.deploySubpath": "bin/Debug/net461"
 }
