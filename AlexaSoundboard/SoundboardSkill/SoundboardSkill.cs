@@ -20,6 +20,8 @@ namespace AlexaSoundboard
     public static class SoundboardSkill
     {
         private static UnsplasharpClient _unsplasharpClient;
+        private static HttpClient _httpClient;
+        private static IAsyncCollector<string> _soundSearchQueue;
 
         [FunctionName("SoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
@@ -52,10 +54,46 @@ namespace AlexaSoundboard
                         return req.CreateResponse(HttpStatusCode.OK, await CreateStaticRequestResponse("help", Statics.HelpMessage));
                     case Statics.AmazonCancelIntent:
                         return req.CreateResponse(HttpStatusCode.OK, await CreateStaticRequestResponse("cancel", Statics.CancelMessage));
+                    case Statics.SoundIntent:
+                        _soundSearchQueue = soundSearchQueue;
+                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest));
                 }
             }
 
             return req.CreateResponse(HttpStatusCode.OK, skillRequest?.Request);
+        }
+
+        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest)
+        {
+            var slots = intentRequest.Intent.Slots;
+            if (!slots.ContainsKey("sound"))
+                return await CreateStaticRequestResponse("error", Statics.NoSoundProvidedMessage);
+
+            var soundName = slots["sound"].Value.ToLower().Replace(" ", "");
+
+            if (await IsSoundAvailableAsync(soundName))
+                return await CreateStaticRequestResponse(soundName, string.Format(Statics.SoundMessage, soundName));
+
+            await _soundSearchQueue.AddAsync(soundName);
+            return await CreateStaticRequestResponse("error", Statics.SoundNotAvailableMessage);
+        }
+
+        private static async Task<string> GetPhotoAsync(string query)
+        {
+            var photo = await _unsplasharpClient.GetRandomPhoto(UnsplasharpClient.Orientation.Squarish, false, query: query);
+
+            return photo.FirstOrDefault() != null
+                ? photo.First().Urls.Regular
+                : string.Empty;
+        }
+
+        private static async Task<bool> IsSoundAvailableAsync(string soundName)
+        {
+            if (_httpClient == null)
+                _httpClient = new HttpClient();
+
+            var response = await _httpClient.GetAsync(string.Format(Statics.SoundUrl, soundName));
+            return response.IsSuccessStatusCode;
         }
 
         private static async Task<SkillResponse> CreateStaticRequestResponse(string searchTerm, string message)
@@ -64,20 +102,10 @@ namespace AlexaSoundboard
             var pictureUrl = await GetPhotoAsync(searchTerm);
 
             // return skill response
-            return string.IsNullOrEmpty(pictureUrl) 
-                ? GetSkillResponse(message, false) 
+            return string.IsNullOrEmpty(pictureUrl)
+                ? GetSkillResponse(message, false)
                 : GetSkillResponse(message, false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } });
         }
-
-        private static async Task<string> GetPhotoAsync(string query)
-        {
-            var photo = await _unsplasharpClient.GetRandomPhoto(UnsplasharpClient.Orientation.Squarish, false, query: query);
-
-            return photo.FirstOrDefault() != null 
-                ? photo.First().Urls.Regular 
-                : string.Empty;
-        }
-
 
         private static SkillResponse GetSkillResponse(string outputSpeech, bool shouldEndSession, StandardCard card = null, bool useSsml = false)
         {
