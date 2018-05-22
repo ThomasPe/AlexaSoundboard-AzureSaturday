@@ -1,0 +1,19 @@
+{
+  "name": "alexasoundboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "alexa-verifier": "^2.0.1",
+    "request": "^2.87.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Alexa"
+  ],
+  "author": "Thomas Pentenrieder & Sebastian Jensen",
+  "license": "MIT"
+}
