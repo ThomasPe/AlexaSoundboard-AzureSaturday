@@ -330,3 +330,4 @@ ASALocalRun/
 .mfractor/
 
 AlexaSoundboard/local\.settings\.json
+/AlexaSoundboard/SoundboardSkill/Utils/ApiCredentials.cs
