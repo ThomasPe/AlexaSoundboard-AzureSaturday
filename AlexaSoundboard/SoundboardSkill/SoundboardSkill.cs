@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -34,7 +35,7 @@ namespace AlexaSoundboard
             log.Info("Alexa Soundboard - Triggerd");
 
             // create unsplash client to get images
-            _unsplasharpClient = new UnsplasharpClient(ApiCredentials.UnsplashKey);
+            _unsplasharpClient = new UnsplasharpClient(GetEnvironmentVariable("UnsplashKey"));
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
@@ -146,6 +147,11 @@ namespace AlexaSoundboard
             };
 
             return skillResponse;
+        }
+
+        public static string GetEnvironmentVariable(string name)
+        {
+            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
         }
     }
 }
