@@ -73,5 +73,5 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
     File.Delete(temp);
     Directory.Delete(tempPath, true);    
 
-    return blockBlob.DeleteIfExists();
+    return myBlob.DeleteIfExists();
 }
