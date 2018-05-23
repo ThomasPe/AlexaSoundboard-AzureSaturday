@@ -74,10 +74,11 @@ namespace AlexaSoundboard
             if (!slots.ContainsKey("sound"))
                 return await CreateStaticRequestResponse("error", Statics.NoSoundProvidedMessage);
 
-            var soundName = slots["sound"].Value.ToLower().Replace(" ", "");
+            var soundName = slots["sound"].Value;
+            var soundFileName = soundName.AsFileName();
 
-            if (await IsSoundAvailableAsync(soundName))
-                return await CreateStaticRequestResponse(soundName, string.Format(Statics.SoundMessage, soundName), true);
+            if (await IsSoundAvailableAsync(soundFileName))
+                return await CreateStaticRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), true);
 
             await _soundSearchQueue.AddAsync(soundName);
             return await CreateStaticRequestResponse("error", Statics.SoundNotAvailableMessage);
