@@ -30296,19 +30296,31 @@ module.exports = {
 /* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var request = __webpack_require__(220);
-var cheerio = __webpack_require__(324);
-
+const request = __webpack_require__(220);
+const cheerio = __webpack_require__(324);
+const soundbaseuri = 'https://www.myinstants.com/media/sounds/';
 module.exports = function (context, myQueueItem) {
     context.log('JavaScript queue trigger function processed work item:', myQueueItem);
 
     request('https://www.myinstants.com/search/?name=power+rangers+theme', function (error, response, html) {
         if (!error && response.statusCode == 200) {
+            context.log("successful download of html");
             var $ = cheerio.load(html);
             var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
-            console.log(sound);
+            context.log(sound);
+            var fileUri = soundbaseuri + sound;
+            request(fileUri, function (error, response, file) {
+                if (!error && response.statusCode == 200) {
+                    context.binding.myOutputBlob = file;
+                } else {
+                    context.log(error);
+                }
+                context.done();
+            });
+        } else {
+            context.log("error: " + error);
+            context.done();
         }
-        context.done();
     });
 
 };

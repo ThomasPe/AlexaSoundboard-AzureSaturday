@@ -1,23 +1,23 @@
 {
-    "disabled": false,
-    "bindings": [
-        {
-            "name": "myQueueItem",
-            "type": "queueTrigger",
-            "direction": "in",
-            "queueName": "soundsearch",
-            "connection": "alexasoundboard_STORAGE"
-        },
-        {
-            "name": "myOutputBlob",
-            "type": "blob",
-            "path": "sounds-new/{name}",
-            "connection": "alexasoundboard_STORAGE",
-            "direction": "out"
-        }
-    ],
-    "_originalEntryPoint": false,
-    "_originalScriptFile": "index.js",
-    "scriptFile": "../.funcpack/index.js",
-    "entryPoint": "SoundSearch"
+ "disabled": false,
+ "bindings": [
+  {
+   "name": "myQueueItem",
+   "type": "queueTrigger",
+   "direction": "in",
+   "queueName": "soundsearch",
+   "connection": "alexasoundboard_STORAGE"
+  },
+  {
+   "name": "myOutputBlob",
+   "type": "blob",
+   "path": "sounds-new/{name}",
+   "connection": "alexasoundboard_STORAGE",
+   "direction": "out"
+  }
+ ],
+ "_originalEntryPoint": false,
+ "_originalScriptFile": "index.js",
+ "scriptFile": "../.funcpack/index.js",
+ "entryPoint": "SoundSearch"
 }
