@@ -11,7 +11,7 @@
     {
       "name": "myOutputBlob",
       "type": "blob",
-      "path": "samples-workitems/{name}",
+      "path": "sounds/{name}",
       "connection": "alexasoundboard_STORAGE",
       "direction": "out"
     }

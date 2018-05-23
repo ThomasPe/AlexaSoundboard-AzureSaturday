@@ -5,7 +5,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using System.Diagnostics;
 using System.IO;
 
-public static async Task Run(Stream myBlob, string name, Binder binder, TraceWriter log)
+public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, TraceWriter log)
 {
     log.Info($"Jordan C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
 
@@ -72,4 +72,6 @@ public static async Task Run(Stream myBlob, string name, Binder binder, TraceWri
     File.Delete(tempOut);
     File.Delete(temp);
     Directory.Delete(tempPath, true);    
+
+    return blockBlob.DeleteIfExists();
 }
