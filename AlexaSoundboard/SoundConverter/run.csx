@@ -58,7 +58,7 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
 
     var attributes = new Attribute[]
     {
-        new BlobAttribute("sounds/" + name + ".mp3"),
+        new BlobAttribute("sounds/" + name),
         new StorageAccountAttribute("alexasoundboard_STORAGE")
     };
 
@@ -67,7 +67,7 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
     log.Info($"Renc Length: {renc.Length}");
     var writer = await binder.BindAsync<CloudBlockBlob>(attributes);
 
-   // await writer.UploadFromByteArrayAsync(renc, 0, renc.Length);
+    await writer.UploadFromByteArrayAsync(renc, 0, renc.Length);
 
     File.Delete(tempOut);
     File.Delete(temp);
