@@ -7,12 +7,12 @@ using System.IO;
 
 public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, TraceWriter log)
 {
-    log.Info($"Jordan C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+    log.Info($"Jordan C# Blob trigger function Processed blob\n Name:{name}");
 
     byte[] bytes = null;
 
     using(var ms = new MemoryStream()){
-        myBlob.CopyTo(ms);
+        myBlob.DownloadToStream(ms);
         bytes = ms.ToArray();
     }
 
