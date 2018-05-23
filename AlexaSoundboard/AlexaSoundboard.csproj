@@ -1,7 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include=".funcpack\index.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include=".funcpack\original.index.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Alexa.NET" Version="1.5.4" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.13" />
