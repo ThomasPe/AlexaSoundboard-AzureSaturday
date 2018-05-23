@@ -22,6 +22,7 @@ namespace AlexaSoundboard
     {
         private static UnsplasharpClient _unsplasharpClient;
         private static HttpClient _httpClient;
+        private static TraceWriter _log;
         private static IAsyncCollector<string> _soundSearchQueue;
 
         [FunctionName("SoundboardSkill")]
@@ -32,13 +33,13 @@ namespace AlexaSoundboard
             IAsyncCollector<string> soundSearchQueue,
             TraceWriter log)
         {
-            log.Info("Alexa Soundboard - Triggerd");
+            _log = log;
+
+            _log.Info("Alexa Soundboard - Triggerd");
 
             // create unsplash client to get images
             var apiKey = GetEnvironmentVariable("UnsplashKey");
             _unsplasharpClient = new UnsplasharpClient(apiKey);
-
-            log.Info($"Alexa Soundboard - Key: {apiKey}");
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
@@ -97,6 +98,9 @@ namespace AlexaSoundboard
                 _httpClient = new HttpClient();
 
             var response = await _httpClient.GetAsync(string.Format(Statics.SoundUrl, soundName));
+
+            _log.Info($"Alexa Soundboard - Sound Name: {soundName} | IsSoundAvailable: {response.IsSuccessStatusCode}");
+            
             return response.IsSuccessStatusCode;
         }
 
@@ -104,6 +108,8 @@ namespace AlexaSoundboard
         {
             // get a welcome picture
             var pictureUrl = await GetPhotoAsync(searchTerm);
+
+            _log.Info($"Alexa Soundboard - Picture Url: {pictureUrl}");
 
             // return skill response
             return string.IsNullOrEmpty(pictureUrl)
