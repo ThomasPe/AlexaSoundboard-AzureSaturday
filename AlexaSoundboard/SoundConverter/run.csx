@@ -58,7 +58,7 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
 
     var attributes = new Attribute[]
     {
-        new BlobAttribute("renc/" + name + "_reenc.mpg"),
+        new BlobAttribute("sounds/" + name + ".mp3"),
         new StorageAccountAttribute("alexasoundboard_STORAGE")
     };
 
