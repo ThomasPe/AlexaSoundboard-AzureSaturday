@@ -7,6 +7,13 @@
       "direction": "in",
       "path": "sounds-new/{name}",
       "connection": "alexasoundboard_STORAGE"
+    },
+    {
+      "name": "myOutputBlob",
+      "type": "blob",
+      "path": "samples-workitems/{name}",
+      "connection": "alexasoundboard_STORAGE",
+      "direction": "out"
     }
   ]
 }
