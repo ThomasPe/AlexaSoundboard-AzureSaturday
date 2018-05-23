@@ -16,10 +16,10 @@ public static async Task Run(Stream myBlob, string name, Binder binder, TraceWri
         bytes = ms.ToArray();
     }
 
-    var f = @"D:\home\site\wwwroot\Timelapser\ffmpeg.exe";
+    var f = @"D:\home\site\wwwroot\SoundConverter\ffmpeg.exe";
 
     var temp = Path.GetTempFileName();
-    var tempOut = Path.GetTempFileName() + ".mpg";
+    var tempOut = Path.GetTempFileName() + ".mp3";
 
     var tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
@@ -36,7 +36,7 @@ public static async Task Run(Stream myBlob, string name, Binder binder, TraceWri
     var psi = new ProcessStartInfo();
 
     psi.FileName = f;
-    psi.Arguments = $"-i \"{temp}\" -y -s 640x360 -b:v 1024k -r 29.7 -movflags faststart -pix_fmt yuv420p \"{tempOut}\"";
+    psi.Arguments = $"-i \"{temp}\" -y -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 \"{tempOut}\"";
     psi.RedirectStandardOutput = true;
     psi.RedirectStandardError = true;
     psi.UseShellExecute = false;
@@ -59,7 +59,7 @@ public static async Task Run(Stream myBlob, string name, Binder binder, TraceWri
     var attributes = new Attribute[]
     {
         new BlobAttribute("renc/" + name + "_reenc.mpg"),
-        new StorageAccountAttribute("jortana_STORAGE")
+        new StorageAccountAttribute("alexasoundboard_STORAGE")
     };
 
 
