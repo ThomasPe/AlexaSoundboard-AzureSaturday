@@ -1,0 +1,13 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "name": "inputMessage",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "sounddownload",
+      "connection": "alexasoundboard_STORAGE"
+    }  
+  ]
+}
+

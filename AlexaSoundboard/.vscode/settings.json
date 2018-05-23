@@ -1,5 +1,5 @@
 {
-  "azureFunctions.projectLanguage": "PowerShell",
+  "azureFunctions.projectLanguage": "F#Script",
   "azureFunctions.projectRuntime": "~1",
   "azureFunctions.templateFilter": "All",
   "azureFunctions.deploySubpath": "bin/Debug/net461"
