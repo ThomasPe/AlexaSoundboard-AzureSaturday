@@ -35,7 +35,10 @@ namespace AlexaSoundboard
             log.Info("Alexa Soundboard - Triggerd");
 
             // create unsplash client to get images
-            _unsplasharpClient = new UnsplasharpClient(GetEnvironmentVariable("UnsplashKey"));
+            var apiKey = GetEnvironmentVariable("UnsplashKey");
+            _unsplasharpClient = new UnsplasharpClient(apiKey);
+
+            log.Info($"Alexa Soundboard - Key: {apiKey}");
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
@@ -73,7 +76,7 @@ namespace AlexaSoundboard
             var soundName = slots["sound"].Value.ToLower().Replace(" ", "");
 
             if (await IsSoundAvailableAsync(soundName))
-                return await CreateStaticRequestResponse(soundName, string.Format(Statics.SoundMessage, soundName));
+                return await CreateStaticRequestResponse(soundName, string.Format(Statics.SoundMessage, soundName), true);
 
             await _soundSearchQueue.AddAsync(soundName);
             return await CreateStaticRequestResponse("error", Statics.SoundNotAvailableMessage);
@@ -97,15 +100,15 @@ namespace AlexaSoundboard
             return response.IsSuccessStatusCode;
         }
 
-        private static async Task<SkillResponse> CreateStaticRequestResponse(string searchTerm, string message)
+        private static async Task<SkillResponse> CreateStaticRequestResponse(string searchTerm, string message, bool useSsml = false)
         {
             // get a welcome picture
             var pictureUrl = await GetPhotoAsync(searchTerm);
 
             // return skill response
             return string.IsNullOrEmpty(pictureUrl)
-                ? GetSkillResponse(message, false)
-                : GetSkillResponse(message, false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } });
+                ? GetSkillResponse(message, false, useSsml: useSsml)
+                : GetSkillResponse(message, false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } }, useSsml);
         }
 
         private static SkillResponse GetSkillResponse(string outputSpeech, bool shouldEndSession, StandardCard card = null, bool useSsml = false)
