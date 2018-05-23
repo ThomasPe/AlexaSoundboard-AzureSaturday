@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
@@ -26,6 +26,9 @@
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+    <None Update="SoundConverter\ffmpeg.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SoundConverter\function.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
