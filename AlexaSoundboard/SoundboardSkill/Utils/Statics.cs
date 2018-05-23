@@ -1,9 +1,10 @@
-﻿namespace AlexaSoundboard.Utils
+﻿namespace AlexaSoundboard.SoundboardSkill.Utils
 {
     public static class Statics
     {
         // Intents
         public const string SoundIntent = "SoundIntent";
+        public const string RandomSoundIntent = "RandomSoundIntent";
         public const string AmazonStopIntent = "AMAZON.StopIntent";
         public const string AmazonCancelIntent = "AMAZON.CancelIntent";
         public const string AmazonHelpIntent = "AMAZON.HelpIntent";
@@ -20,5 +21,6 @@
         public static string NoSoundProvidedMessage = "I didn't catch the sound you want to hear. Please try again.";
         public static string SoundNotAvailableMessage = "Currently this sound isn't available. But I will try to get it. Please try it again later.";
         public static string SoundMessage = $"<speak><audio src='{SoundUrl}' /></speak>";
+        public static string RandomSoundMessage = "<speak><audio src='{0}' /></speak>";
     }
 }
