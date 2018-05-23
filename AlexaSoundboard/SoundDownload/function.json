@@ -1,0 +1,19 @@
+{
+  "disabled": false,
+  "bindings": [
+    {
+      "name": "triggerInput",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "sounddownload",
+      "connection": "alexasoundboard_STORAGE"
+    },
+    {
+      "type": "blob",
+      "name": "outputBlob",
+      "path": "sounds-new/{filename}",
+      "connection": "alexasoundboard_STORAGE",
+      "direction": "out"
+    }
+  ]
+}

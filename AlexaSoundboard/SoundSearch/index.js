@@ -10,15 +10,8 @@ module.exports = function (context, myQueueItem) {
             var $ = cheerio.load(html);
             var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
             context.log(sound);
-            var fileUri = soundbaseuri + sound;
-            request(fileUri, function (error, response, file) {
-                if (!error && response.statusCode == 200) {
-                    context.binding.myOutputBlob = file;
-                } else {
-                    context.log(error);
-                }
-                context.done();
-            });
+            context.binding.soundUri = soundbaseuri + sound;
+            context.done();
         } else {
             context.log("error: " + error);
             context.done();

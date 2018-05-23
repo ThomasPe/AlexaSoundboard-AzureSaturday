@@ -9,11 +9,11 @@
    "connection": "alexasoundboard_STORAGE"
   },
   {
-   "name": "myOutputBlob",
-   "type": "blob",
-   "path": "sounds-new/{name}",
-   "connection": "alexasoundboard_STORAGE",
-   "direction": "out"
+    "type": "queue",
+    "name": "soundUri",
+    "queueName": "sounddownload",
+    "connection": "alexasoundboard_STORAGE",
+    "direction": "out"
   }
  ],
  "_originalEntryPoint": false,

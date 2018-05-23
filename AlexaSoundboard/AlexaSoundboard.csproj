@@ -36,6 +36,12 @@
     <None Update="SoundConverter\run.csx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SoundDownload\function.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SoundDownload\run.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SoundSearch\function.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
