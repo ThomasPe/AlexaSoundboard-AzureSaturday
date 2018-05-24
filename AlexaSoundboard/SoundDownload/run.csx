@@ -11,7 +11,8 @@ using System.IO;
 public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
     log.Info($"C# Queue trigger function processed: {myQueueItem}");
-    
+    string filename = System.IO.Path.GetFileName(myQueueItem);
+    log.Info(filename);
     string connectionString = GetEnvironmentVariable("alexasoundboard_STORAGE");
     log.Info(connectionString);
     var account = CloudStorageAccount.Parse(connectionString);
