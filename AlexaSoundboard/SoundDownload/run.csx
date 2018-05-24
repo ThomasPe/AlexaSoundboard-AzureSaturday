@@ -4,8 +4,6 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 using System.Diagnostics;
 using System.IO;
-using Systen.Net;
-
 
 public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
@@ -16,8 +14,8 @@ public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
     var account = CloudStorageAccount.Parse(connectionString);
     var blobClient = account.CreateCloudBlobClient();
     var blobContainer = blobClient.GetContainerReference("sounds");
-    blobContainer.CreateIfNotExists();
-    var newBlockBlob = blobContainer.GetBlockBlobReference("test.mp3");
-    newBlockBlob.StartCopy(new Uri(myQueueItem));
+    // blobContainer.CreateIfNotExists();
+    // var newBlockBlob = blobContainer.GetBlockBlobReference("test.mp3");
+    // newBlockBlob.StartCopy(new Uri(myQueueItem));
 
 }
