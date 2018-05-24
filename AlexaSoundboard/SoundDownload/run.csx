@@ -10,7 +10,7 @@ using System.IO;
 
 public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
-    log.Info($"C# Queue trigger function processed: {myQueueItem}");
+    log.Info($"SoundDonwload started: {myQueueItem}");
     string url = myQueueItem.Split(';').First();
     log.Info(url);
     string name = myQueueItem.Split(';').Last();

@@ -7,7 +7,7 @@ using System.IO;
 
 public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, TraceWriter log)
 {
-    log.Info($"Jordan C# Blob trigger function Processed blob\n Name:{name}");
+    log.Info($"SoundConverter started: {name}");
 
     byte[] bytes = null;
 

@@ -1,5 +1,5 @@
 module.exports = function (context, myQueueItem) {
-    context.log('JavaScript queue trigger function processed work item:', myQueueItem);
+    context.log('SoundSearch Function started:', myQueueItem);
 
     const request = require('request');
     const cheerio = require('cheerio');
