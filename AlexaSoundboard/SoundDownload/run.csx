@@ -9,7 +9,7 @@ public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
     log.Info($"C# Queue trigger function processed: {myQueueItem}");
     
-    string connectionString = ConfigurationManager.AppSettings["alexasoundboard_STORAGE"];
+    string connectionString = GetEnvironmentVariable("alexasoundboard_STORAGE");
     log.Info(connectionString);
     var account = CloudStorageAccount.Parse(connectionString);
     var blobClient = account.CreateCloudBlobClient();
@@ -18,4 +18,9 @@ public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
     // var newBlockBlob = blobContainer.GetBlockBlobReference("test.mp3");
     // newBlockBlob.StartCopy(new Uri(myQueueItem));
 
+}
+
+public static string GetEnvironmentVariable(string name)
+{
+    return System.Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
 }
