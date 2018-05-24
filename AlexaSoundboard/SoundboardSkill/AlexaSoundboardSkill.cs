@@ -60,7 +60,7 @@ namespace AlexaSoundboard.SoundboardSkill
 
             // check for launch request
             if (skillRequest?.Request is LaunchRequest)
-                return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("welcome", Statics.WelcomeMessage));
+                return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
 
             // check for intent request
             if (skillRequest?.Request is IntentRequest intentRequest)
@@ -70,7 +70,7 @@ namespace AlexaSoundboard.SoundboardSkill
                     case Statics.AmazonStopIntent:
                         return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("stop", Statics.StopMessage));
                     case Statics.AmazonHelpIntent:
-                        return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage));
+                        return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage, false));
                     case Statics.AmazonCancelIntent:
                         return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
@@ -99,10 +99,10 @@ namespace AlexaSoundboard.SoundboardSkill
             var soundFileName = soundName.AsFileName();
 
             if (await IsSoundAvailableAsync(soundFileName))
-                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), true);
+                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), useSsml: true);
 
             await _soundSearchQueue.AddAsync(soundName);
-            
+
             //var mailAddress = await GetUserMailAddressAsync(_accessToken);
             //_log.Info($"Alexa Soundboard - Mail: {mailAddress}");
 
@@ -166,16 +166,17 @@ namespace AlexaSoundboard.SoundboardSkill
         /// </summary>
         /// <param name="searchTerm">Search query for the picture</param>
         /// <param name="message">Text which should be played</param>
+        /// <param name="shouldEndSession">Indicates if the session should be closed</param>
         /// <param name="useSsml">Indicates if the text is using SSML or not</param>
-        private static async Task<SkillResponse> CreateRequestResponse(string searchTerm, string message, bool useSsml = false)
+        private static async Task<SkillResponse> CreateRequestResponse(string searchTerm, string message, bool shouldEndSession = true, bool useSsml = false)
         {
             // get a picture
             var pictureUrl = await GetPhotoAsync(searchTerm);
 
             // return skill response
             return string.IsNullOrEmpty(pictureUrl)
-                ? GetSkillResponse(message, false, useSsml: useSsml)
-                : GetSkillResponse(message, false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } }, useSsml);
+                ? GetSkillResponse(message, shouldEndSession, useSsml: useSsml)
+                : GetSkillResponse(message, shouldEndSession, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } }, useSsml);
         }
 
         /// <summary>
