@@ -2,12 +2,11 @@
   "disabled": false,
   "bindings": [
     {
-      "name": "inputMessage",
+      "name": "myQueueItem",
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "sounddownload",
       "connection": "alexasoundboard_STORAGE"
-    }  
+    }
   ]
 }
-

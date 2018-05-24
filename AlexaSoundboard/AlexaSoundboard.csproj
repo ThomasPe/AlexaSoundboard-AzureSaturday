@@ -42,6 +42,12 @@
     <None Update="SoundDownloader\run.fsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SoundDownload\function.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SoundDownload\run.csx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="SoundSearch\function.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
