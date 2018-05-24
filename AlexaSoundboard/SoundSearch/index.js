@@ -6,7 +6,7 @@ module.exports = function (context, myQueueItem) {
     const soundbaseuri = 'https://www.myinstants.com/media/sounds/';
 
     var query = myQueueItem.split(' ').join('+');
-    var name = myQueueItem.split(' ').join();
+    var name = myQueueItem.split(' ').join('');
     context.log('query: ' + query);
     context.log('name: ' + name);
     request('https://www.myinstants.com/search/?name=' + query, function (error, response, html) {
@@ -17,7 +17,7 @@ module.exports = function (context, myQueueItem) {
             var count = $('.instant .small-button').length;
             context.log('Sounds found: ' + count);
             var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
-            context.log(sound);
+            context.log("found sound: " + sound);
             context.binding.soundUri = soundbaseuri + sound + ';' + name;
             context.done();
         } else {
