@@ -43,17 +43,17 @@ namespace AlexaSoundboard.SoundboardSkill
             _log = log;
 
             _log.Info("Alexa Soundboard - Triggerd");
-            
+
             // create unsplash client to get images
             var apiKey = GetEnvironmentVariable("UnsplashKey");
             _unsplasharpClient = new UnsplasharpClient(apiKey);
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
-            
-            // validate if user is authenticated
-            if (string.IsNullOrEmpty(skillRequest.Session.User.AccessToken))
-                return req.CreateResponse(HttpStatusCode.OK, GetSkillResponseForAccountLinking());
+
+            //// validate if user is authenticated
+            //if (string.IsNullOrEmpty(skillRequest.Session.User.AccessToken))
+            //    return req.CreateResponse(HttpStatusCode.OK, GetSkillResponseForAccountLinking());
 
             // get accesstoken
             _accessToken = skillRequest.Session.User.AccessToken;
@@ -102,9 +102,9 @@ namespace AlexaSoundboard.SoundboardSkill
                 return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), true);
 
             await _soundSearchQueue.AddAsync(soundName);
-            var mailAddress = await GetUserMailAddressAsync(_accessToken);
-
-            _log.Info($"Alexa Soundboard - Mail: {mailAddress}");
+            
+            //var mailAddress = await GetUserMailAddressAsync(_accessToken);
+            //_log.Info($"Alexa Soundboard - Mail: {mailAddress}");
 
             return await CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
@@ -135,7 +135,7 @@ namespace AlexaSoundboard.SoundboardSkill
                 ? photo.First().Urls.Regular
                 : string.Empty;
         }
-        
+
         /// <summary>
         /// Checks if the sound is available.
         /// </summary>
@@ -229,9 +229,9 @@ namespace AlexaSoundboard.SoundboardSkill
         {
             var response = new ResponseBody
             {
-                ShouldEndSession = false,
+                ShouldEndSession = true,
                 Card = new LinkAccountCard(),
-                OutputSpeech = new PlainTextOutputSpeech {Text = Statics.AccountLinkingMessage},
+                OutputSpeech = new PlainTextOutputSpeech { Text = Statics.AccountLinkingMessage },
             };
 
             var skillResponse = new SkillResponse
