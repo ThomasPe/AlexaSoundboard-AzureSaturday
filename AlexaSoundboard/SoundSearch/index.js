@@ -20,7 +20,7 @@ module.exports = function (context, myQueueItem) {
             context.log("found sound: " + sound);
             var soundMsg = soundbaseuri + sound + ';' + name;
             context.log("soundMsg: " + soundMsg);
-            context.binding.soundUri = soundMsg;
+            context.bindings.soundUri = soundMsg;
             context.done();
         } else {
             context.log("error: " + error);
