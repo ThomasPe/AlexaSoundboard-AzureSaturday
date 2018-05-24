@@ -11,9 +11,9 @@ using System.IO;
 public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
     log.Info($"C# Queue trigger function processed: {myQueueItem}");
-    string url = myQueueItem.split(";").first();
+    string url = myQueueItem.Split(";").First();
     log.Info(url);
-    string name = myQueueItem.split(";").last();
+    string name = myQueueItem.Split(";").Last();
     log.Info(name);
     string filename = System.IO.Path.GetFileName(url);
     log.Info(filename);
