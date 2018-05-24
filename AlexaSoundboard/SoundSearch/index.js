@@ -10,6 +10,7 @@ module.exports = function (context, myQueueItem) {
     context.log('query: ' + query);
     context.log('name: ' + name);
     request('https://www.myinstants.com/search/?name=' + query, function (error, response, html) {
+        context.log('status code: ' + response.statusCode);
         if (!error && response.statusCode == 200) {
             context.log("successful download of html");
             var $ = cheerio.load(html);
