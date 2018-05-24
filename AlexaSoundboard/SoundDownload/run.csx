@@ -11,15 +11,19 @@ using System.IO;
 public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
 {
     log.Info($"C# Queue trigger function processed: {myQueueItem}");
-    string filename = System.IO.Path.GetFileName(myQueueItem);
+    string url = myQueueItem.split(";").first();
+    log.Info(url);
+    string name = myQueueItem.split(";").last();
+    log.Info(name);
+    string filename = System.IO.Path.GetFileName(url);
     log.Info(filename);
     string connectionString = GetEnvironmentVariable("alexasoundboard_STORAGE");
     log.Info(connectionString);
     var account = CloudStorageAccount.Parse(connectionString);
     var blobClient = account.CreateCloudBlobClient();
-    var blobContainer = blobClient.GetContainerReference("sounds");
+    var blobContainer = blobClient.GetContainerReference("sounds-new");
     blobContainer.CreateIfNotExists();
-    var newBlockBlob = blobContainer.GetBlockBlobReference("test.mp3");
+    var newBlockBlob = blobContainer.GetBlockBlobReference(name + ".mp3");
     newBlockBlob.StartCopy(new Uri(myQueueItem));
 
 }
