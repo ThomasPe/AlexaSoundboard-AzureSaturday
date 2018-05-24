@@ -18,7 +18,9 @@ module.exports = function (context, myQueueItem) {
             context.log('Sounds found: ' + count);
             var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
             context.log("found sound: " + sound);
-            context.binding.soundUri = soundbaseuri + sound + ';' + name;
+            var soundMsg = soundbaseuri + sound + ';' + name;
+            context.log("soundMsg: " + soundMsg);
+            context.binding.soundUri = soundMsg;
             context.done();
         } else {
             context.log("error: " + error);
