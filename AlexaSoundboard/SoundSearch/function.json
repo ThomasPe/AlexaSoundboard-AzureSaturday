@@ -16,8 +16,5 @@
    "direction": "out"
   }
  ],
- "_originalEntryPoint": false,
- "_originalScriptFile": "index.js",
- "scriptFile": "../.funcpack/index.js",
- "entryPoint": "SoundSearch"
+ "scriptFile": "index.js"
 }
