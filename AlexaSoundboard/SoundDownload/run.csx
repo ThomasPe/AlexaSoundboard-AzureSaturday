@@ -24,7 +24,7 @@ public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
     var blobContainer = blobClient.GetContainerReference("sounds-new");
     blobContainer.CreateIfNotExists();
     var newBlockBlob = blobContainer.GetBlockBlobReference(name + ".mp3");
-    newBlockBlob.StartCopy(new Uri(myQueueItem));
+    newBlockBlob.StartCopy(new Uri(url));
 
 }
 
