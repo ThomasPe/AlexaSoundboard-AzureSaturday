@@ -1,7 +1,10 @@
 #r "Microsoft.WindowsAzure.Storage"
 
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage.Auth;
 
+using System.Net;
 using System.Diagnostics;
 using System.IO;
 
