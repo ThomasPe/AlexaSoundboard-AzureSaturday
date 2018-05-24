@@ -1,8 +1,10 @@
-const request = require('request');
-const cheerio = require('cheerio');
-const soundbaseuri = 'https://www.myinstants.com/media/sounds/';
 module.exports = function (context, myQueueItem) {
     context.log('JavaScript queue trigger function processed work item:', myQueueItem);
+
+    const request = require('request');
+    const cheerio = require('cheerio');
+    const soundbaseuri = 'https://www.myinstants.com/media/sounds/';
+
     var query = myQueueItem.split(' ').join('+');
     var name = myQueueItem.split(' ').join();
     context.log('query: ' + query);
