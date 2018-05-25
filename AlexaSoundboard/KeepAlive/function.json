@@ -6,6 +6,13 @@
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "0 * * * * *"
+    },
+    {
+      "type": "queue",
+      "name": "Triggered KeepAlive",
+      "queueName": "logging",
+      "connection": "alexasoundboard_STORAGE",
+      "direction": "out"
     }
   ]
 }
