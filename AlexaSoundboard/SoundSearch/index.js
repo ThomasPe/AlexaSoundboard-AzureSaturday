@@ -24,7 +24,7 @@ module.exports = function (context, myQueueItem) {
                 context.bindings.soundLogging = "SoundSearch found " + soundMsg;
                 context.bindings.soundUri = soundMsg;
             } else {
-                context.bindings.soundLogging = "No sound found for " + myQueueItem;
+                context.bindings.soundLogging = "Soundsearch: No sound found for " + myQueueItem;
             }
 
             context.done();
