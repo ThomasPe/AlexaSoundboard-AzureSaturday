@@ -92,7 +92,7 @@ namespace AlexaSoundboard.SoundboardSkill
             if (!slots.ContainsKey("sound"))
                 return CreateRequestResponse("error", Statics.NoSoundProvidedMessage);
 
-            var soundName = slots["sound"].Value;
+            var soundName = slots["sound"].Value.RemoveDiacritics();
             var soundFileName = soundName.AsFileName();
 
             if (IsSoundAvailable(soundFileName, soundNames))
