@@ -11,13 +11,11 @@ using Alexa.NET.Response.Directive;
 using Alexa.NET.Response.Directive.Templates;
 using Alexa.NET.Response.Directive.Templates.Types;
 using AlexaSoundboard.SoundboardSkill.Extensions;
-using AlexaSoundboard.SoundboardSkill.Models;
 using AlexaSoundboard.SoundboardSkill.Utils;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Newtonsoft.Json;
 using Unsplasharp;
 
 namespace AlexaSoundboard.SoundboardSkill
@@ -25,10 +23,8 @@ namespace AlexaSoundboard.SoundboardSkill
     public static class AlexaSoundboardSkill
     {
         private static UnsplasharpClient _unsplasharpClient;
-        private static HttpClient _httpClient;
         private static TraceWriter _log;
         private static IAsyncCollector<string> _soundSearchQueue;
-        private static string _accessToken;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
@@ -51,13 +47,6 @@ namespace AlexaSoundboard.SoundboardSkill
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
 
-            //// validate if user is authenticated
-            //if (string.IsNullOrEmpty(skillRequest.Session.User.AccessToken))
-            //    return req.CreateResponse(HttpStatusCode.OK, GetSkillResponseForAccountLinking());
-
-            // get accesstoken
-            _accessToken = skillRequest.Session.User.AccessToken;
-
             // check for launch request
             if (skillRequest?.Request is LaunchRequest)
                 return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
@@ -75,7 +64,8 @@ namespace AlexaSoundboard.SoundboardSkill
                         return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
                         _soundSearchQueue = soundSearchQueue;
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest));
+                        var soundNames = blobContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
+                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
                         var files = blobContainer.ListBlobs().Select(b => b.Uri.OriginalString);
                         return req.CreateResponse(HttpStatusCode.OK, await HandleRandomSoundIntentAsync(files));
@@ -83,13 +73,13 @@ namespace AlexaSoundboard.SoundboardSkill
             }
 
             // return help intent if nothing suits
-            return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage));
+            return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage, false));
         }
 
         /// <summary>
         /// Creates a response to handle the Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest)
+        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest, IEnumerable<string> soundNames)
         {
             var slots = intentRequest.Intent.Slots;
             if (!slots.ContainsKey("sound"))
@@ -98,13 +88,10 @@ namespace AlexaSoundboard.SoundboardSkill
             var soundName = slots["sound"].Value;
             var soundFileName = soundName.AsFileName();
 
-            if (await IsSoundAvailableAsync(soundFileName))
-                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), useSsml: true);
+            if (IsSoundAvailable(soundFileName, soundNames))
+                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
 
             await _soundSearchQueue.AddAsync(soundName);
-
-            //var mailAddress = await GetUserMailAddressAsync(_accessToken);
-            //_log.Info($"Alexa Soundboard - Mail: {mailAddress}");
 
             return await CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
@@ -140,16 +127,14 @@ namespace AlexaSoundboard.SoundboardSkill
         /// Checks if the sound is available.
         /// </summary>
         /// <param name="soundName">Sound to play</param>
-        private static async Task<bool> IsSoundAvailableAsync(string soundName)
+        /// <param name="soundNames">List of available sounds in the blob storage</param>
+        private static bool IsSoundAvailable(string soundName, IEnumerable<string> soundNames)
         {
-            if (_httpClient == null)
-                _httpClient = new HttpClient();
+            var isSoundAvailable = soundNames.Contains(soundName);
 
-            var response = await _httpClient.GetAsync(string.Format(Statics.SoundUrl, soundName));
+            _log.Info($"Alexa Soundboard - Sound Name: {soundName} | IsSoundAvailable: {isSoundAvailable}");
 
-            _log.Info($"Alexa Soundboard - Sound Name: {soundName} | IsSoundAvailable: {response.IsSuccessStatusCode}");
-
-            return response.IsSuccessStatusCode;
+            return isSoundAvailable;
         }
 
         /// <summary>
@@ -224,34 +209,6 @@ namespace AlexaSoundboard.SoundboardSkill
             };
 
             return skillResponse;
-        }
-
-        private static SkillResponse GetSkillResponseForAccountLinking()
-        {
-            var response = new ResponseBody
-            {
-                ShouldEndSession = true,
-                Card = new LinkAccountCard(),
-                OutputSpeech = new PlainTextOutputSpeech { Text = Statics.AccountLinkingMessage },
-            };
-
-            var skillResponse = new SkillResponse
-            {
-                Response = response,
-                Version = "1.0"
-            };
-
-            return skillResponse;
-        }
-
-        private static async Task<string> GetUserMailAddressAsync(string accessToken)
-        {
-            var amazonProfileUrl = $"https://api.amazon.com/user/profile?access_token={accessToken}";
-            var json = await _httpClient.GetStringAsync(amazonProfileUrl);
-
-            var amazonProfile = JsonConvert.DeserializeObject<AmazonProfile>(json);
-
-            return amazonProfile.Email;
         }
     }
 }
