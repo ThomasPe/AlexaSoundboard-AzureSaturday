@@ -68,7 +68,7 @@ namespace AlexaSoundboard.SoundboardSkill
                         _soundSearchQueue = soundSearchQueue;
                         _imageSearchQueue = imageQueue;
                         var soundNames = soundContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntent(intentRequest, soundNames));
+                        return req.CreateResponse(HttpStatusCode.OK, HandleSoundIntent(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
                         var files = soundContainer.ListBlobs().Select(b => b.Uri.OriginalString);
                         return req.CreateResponse(HttpStatusCode.OK, HandleRandomSoundIntent(files));
@@ -82,7 +82,7 @@ namespace AlexaSoundboard.SoundboardSkill
         /// <summary>
         /// Creates a response to handle the Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleSoundIntent(IntentRequest intentRequest, IEnumerable<string> soundNames)
+        private static SkillResponse HandleSoundIntent(IntentRequest intentRequest, IEnumerable<string> soundNames)
         {
             var slots = intentRequest.Intent.Slots;
             if (!slots.ContainsKey("sound"))
