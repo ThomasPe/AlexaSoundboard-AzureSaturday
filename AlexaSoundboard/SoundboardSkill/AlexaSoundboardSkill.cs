@@ -75,7 +75,7 @@ namespace AlexaSoundboard.SoundboardSkill
             }
 
             // return help intent if nothing suits
-            return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage));
+            return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage, false));
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace AlexaSoundboard.SoundboardSkill
             var soundFileName = soundName.AsFileName();
 
             if (IsSoundAvailable(soundFileName, soundNames))
-                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), useSsml: true);
+                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
 
             await _soundSearchQueue.AddAsync(soundName);
 
