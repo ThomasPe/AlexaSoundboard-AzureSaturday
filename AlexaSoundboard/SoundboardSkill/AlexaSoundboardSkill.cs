@@ -28,7 +28,6 @@ namespace AlexaSoundboard.SoundboardSkill
         private static HttpClient _httpClient;
         private static TraceWriter _log;
         private static IAsyncCollector<string> _soundSearchQueue;
-        private static string _accessToken;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
@@ -50,13 +49,6 @@ namespace AlexaSoundboard.SoundboardSkill
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
-
-            //// validate if user is authenticated
-            //if (string.IsNullOrEmpty(skillRequest.Session.User.AccessToken))
-            //    return req.CreateResponse(HttpStatusCode.OK, GetSkillResponseForAccountLinking());
-
-            // get accesstoken
-            _accessToken = skillRequest.Session.User.AccessToken;
 
             // check for launch request
             if (skillRequest?.Request is LaunchRequest)
@@ -224,34 +216,6 @@ namespace AlexaSoundboard.SoundboardSkill
             };
 
             return skillResponse;
-        }
-
-        private static SkillResponse GetSkillResponseForAccountLinking()
-        {
-            var response = new ResponseBody
-            {
-                ShouldEndSession = true,
-                Card = new LinkAccountCard(),
-                OutputSpeech = new PlainTextOutputSpeech { Text = Statics.AccountLinkingMessage },
-            };
-
-            var skillResponse = new SkillResponse
-            {
-                Response = response,
-                Version = "1.0"
-            };
-
-            return skillResponse;
-        }
-
-        private static async Task<string> GetUserMailAddressAsync(string accessToken)
-        {
-            var amazonProfileUrl = $"https://api.amazon.com/user/profile?access_token={accessToken}";
-            var json = await _httpClient.GetStringAsync(amazonProfileUrl);
-
-            var amazonProfile = JsonConvert.DeserializeObject<AmazonProfile>(json);
-
-            return amazonProfile.Email;
         }
     }
 }
