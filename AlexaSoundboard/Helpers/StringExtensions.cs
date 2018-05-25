@@ -1,4 +1,4 @@
-﻿namespace AlexaSoundboard.SoundboardSkill.Extensions
+﻿namespace AlexaSoundboard.Helpers
 {
     public static class StringExtensions
     {

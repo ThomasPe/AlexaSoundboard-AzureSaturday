@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AlexaSoundboard.SoundboardSkill.Extensions
+namespace AlexaSoundboard.Helpers
 {
     public static class EnumerableExtensions
     {
