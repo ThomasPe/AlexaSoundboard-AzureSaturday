@@ -6,6 +6,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 
 public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, TraceWriter log)
 {
