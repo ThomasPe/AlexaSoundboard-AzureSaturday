@@ -67,7 +67,8 @@ namespace AlexaSoundboard.SoundboardSkill
                         return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
                         _soundSearchQueue = soundSearchQueue;
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest));
+                        var soundNames = blobContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
+                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
                         var files = blobContainer.ListBlobs().Select(b => b.Uri.OriginalString);
                         return req.CreateResponse(HttpStatusCode.OK, await HandleRandomSoundIntentAsync(files));
@@ -81,7 +82,7 @@ namespace AlexaSoundboard.SoundboardSkill
         /// <summary>
         /// Creates a response to handle the Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest)
+        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest, IEnumerable<string> soundNames)
         {
             var slots = intentRequest.Intent.Slots;
             if (!slots.ContainsKey("sound"))
@@ -90,13 +91,10 @@ namespace AlexaSoundboard.SoundboardSkill
             var soundName = slots["sound"].Value;
             var soundFileName = soundName.AsFileName();
 
-            if (await IsSoundAvailableAsync(soundFileName))
+            if (IsSoundAvailable(soundFileName, soundNames))
                 return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), useSsml: true);
 
             await _soundSearchQueue.AddAsync(soundName);
-
-            //var mailAddress = await GetUserMailAddressAsync(_accessToken);
-            //_log.Info($"Alexa Soundboard - Mail: {mailAddress}");
 
             return await CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
@@ -132,16 +130,14 @@ namespace AlexaSoundboard.SoundboardSkill
         /// Checks if the sound is available.
         /// </summary>
         /// <param name="soundName">Sound to play</param>
-        private static async Task<bool> IsSoundAvailableAsync(string soundName)
+        /// <param name="soundNames">List of available sounds in the blob storage</param>
+        private static bool IsSoundAvailable(string soundName, IEnumerable<string> soundNames)
         {
-            if (_httpClient == null)
-                _httpClient = new HttpClient();
+            var isSoundAvailable = soundNames.Contains(soundName);
 
-            var response = await _httpClient.GetAsync(string.Format(Statics.SoundUrl, soundName));
+            _log.Info($"Alexa Soundboard - Sound Name: {soundName} | IsSoundAvailable: {isSoundAvailable}");
 
-            _log.Info($"Alexa Soundboard - Sound Name: {soundName} | IsSoundAvailable: {response.IsSuccessStatusCode}");
-
-            return response.IsSuccessStatusCode;
+            return isSoundAvailable;
         }
 
         /// <summary>
