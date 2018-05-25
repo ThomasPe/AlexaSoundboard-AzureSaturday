@@ -36,7 +36,7 @@ namespace AlexaSoundboard.SoundboardSkill
             ICollector<string> soundQueue,
             [Queue("imagesearch")]
             ICollector<string> imageQueue,
-            [Queue("imagesearch")]
+            [Queue("logging")]
             ICollector<string> loggingQueue,
             [Blob("sounds")]
             CloudBlobContainer soundContainer,
