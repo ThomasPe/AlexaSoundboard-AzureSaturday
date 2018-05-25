@@ -49,13 +49,19 @@ namespace AlexaSoundboard.SoundboardSkill
             _imageContainer = imageContainer;
 
             _log.Info("Alexa Soundboard - Triggerd");
+            _loggingQueue.Add("Alexa Soundboard - Triggerd");
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
 
             // check for launch request
             if (skillRequest?.Request is LaunchRequest)
-                return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
+            {
+                _loggingQueue.Add("Alexa Soundboard - LaunchRequest");
+
+                return req.CreateResponse(HttpStatusCode.OK,
+                    CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
+            }
 
             // check for intent request
             if (skillRequest?.Request is IntentRequest intentRequest)
@@ -63,21 +69,28 @@ namespace AlexaSoundboard.SoundboardSkill
                 switch (intentRequest.Intent.Name)
                 {
                     case Statics.AmazonStopIntent:
+                        _loggingQueue.Add("Alexa Soundboard - Amazon StopIntent");
                         return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("stop", Statics.StopMessage));
                     case Statics.AmazonHelpIntent:
+                        _loggingQueue.Add("Alexa Soundboard - Amazon HelpIntent");
                         return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("help", Statics.HelpMessage, false));
                     case Statics.AmazonCancelIntent:
+                        _loggingQueue.Add("Alexa Soundboard - Amazon CancelIntent");
                         return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
                         _soundQueue = soundQueue;
                         _imageQueue = imageQueue;
+                        _loggingQueue.Add("Alexa Soundboard - SoundIntent");
                         var soundNames = soundContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
                         return req.CreateResponse(HttpStatusCode.OK, HandleSoundIntent(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
+                        _loggingQueue.Add("Alexa Soundboard - RandomSoundIntent");
                         var files = soundContainer.ListBlobs().Select(b => b.Uri.OriginalString);
                         return req.CreateResponse(HttpStatusCode.OK, HandleRandomSoundIntent(files));
                 }
             }
+
+            _loggingQueue.Add("Alexa Soundboard - FALLBACK");
 
             // return help intent if nothing suits
             return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("help", Statics.HelpMessage, false));
