@@ -24,17 +24,17 @@ namespace AlexaSoundboard.SoundboardSkill
     {
         private static TraceWriter _log;
         private static CloudBlobContainer _imageContainer;
-        private static IAsyncCollector<string> _soundSearchQueue;
-        private static IAsyncCollector<string> _imageSearchQueue;
+        private static ICollector<string> _soundSearchQueue;
+        private static ICollector<string> _imageSearchQueue;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "alexa-soundboard")]
             HttpRequestMessage req,
             [Queue("soundsearch")]
-            IAsyncCollector<string> soundSearchQueue,
+            ICollector<string> soundSearchQueue,
             [Queue("imagesearch")]
-            IAsyncCollector<string> imageQueue,
+            ICollector<string> imageQueue,
             [Blob("sounds")]
             CloudBlobContainer soundContainer,
             [Blob("images")]
@@ -94,8 +94,8 @@ namespace AlexaSoundboard.SoundboardSkill
             if (IsSoundAvailable(soundFileName, soundNames))
                 return CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
 
-            await _soundSearchQueue.AddAsync(soundName);
-            await _imageSearchQueue.AddAsync(soundName);
+            _soundSearchQueue.Add(soundName);
+            _imageSearchQueue.Add(soundName);
 
             return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
