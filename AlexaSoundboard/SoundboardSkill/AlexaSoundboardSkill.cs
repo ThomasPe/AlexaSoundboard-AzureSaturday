@@ -11,13 +11,11 @@ using Alexa.NET.Response.Directive;
 using Alexa.NET.Response.Directive.Templates;
 using Alexa.NET.Response.Directive.Templates.Types;
 using AlexaSoundboard.SoundboardSkill.Extensions;
-using AlexaSoundboard.SoundboardSkill.Models;
 using AlexaSoundboard.SoundboardSkill.Utils;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
-using Newtonsoft.Json;
 using Unsplasharp;
 
 namespace AlexaSoundboard.SoundboardSkill
