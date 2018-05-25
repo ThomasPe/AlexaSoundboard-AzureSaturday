@@ -8,7 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 
-public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, TraceWriter log)
+public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, ICollector<string> logging, TraceWriter log)
 {
     log.Info($"SoundConverter started: {name}");
 
@@ -39,7 +39,7 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
     var psi = new ProcessStartInfo();
 
     psi.FileName = f;
-    psi.Arguments = $"-i \"{temp}\" -y -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 \"{tempOut}\"";
+    psi.Arguments = $"-i \"{temp}\" -y -ac 2 -codec:a libmp3lame -b:a 48k -ar 16000 -t 00:01:29 \"{tempOut}\"";
     psi.RedirectStandardOutput = true;
     psi.RedirectStandardError = true;
     psi.UseShellExecute = false;
@@ -78,6 +78,7 @@ public static async Task Run(CloudBlockBlob myBlob, string name, Binder binder, 
 
     myBlob.DeleteIfExists();
 
+    logging.Add("SoundConverter: sucessfully converted " + name);  
     // Notify Twitter 
     var twitterAppUri = "https://prod-46.westeurope.logic.azure.com:443/workflows/62e19b15ab7e4354a0745e4272875e11/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=oFNsoHMDaTKs_vxbi1G_UrgL8nMmgiOEE49NwiKWtBg";
     var message = $"{{\"message\":\"I have found a new sound! {name}\"}}";
