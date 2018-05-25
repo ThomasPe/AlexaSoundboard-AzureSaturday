@@ -7,13 +7,6 @@
             "direction": "in",
             "queueName": "sounddownload",
             "connection": "alexasoundboard_STORAGE"
-        },
-        {
-            "type": "queue",
-            "name": "'SoundDownload finished'",
-            "queueName": "logging",
-            "connection": "alexasoundboard_STORAGE",
-            "direction": "out"
         }
     ]
 }
