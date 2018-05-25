@@ -25,7 +25,6 @@ namespace AlexaSoundboard.SoundboardSkill
     public static class AlexaSoundboardSkill
     {
         private static UnsplasharpClient _unsplasharpClient;
-        private static HttpClient _httpClient;
         private static TraceWriter _log;
         private static IAsyncCollector<string> _soundSearchQueue;
 
