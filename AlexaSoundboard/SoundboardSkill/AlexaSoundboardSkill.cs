@@ -10,7 +10,7 @@ using Alexa.NET.Response;
 using Alexa.NET.Response.Directive;
 using Alexa.NET.Response.Directive.Templates;
 using Alexa.NET.Response.Directive.Templates.Types;
-using AlexaSoundboard.SoundboardSkill.Extensions;
+using AlexaSoundboard.Helpers;
 using AlexaSoundboard.SoundboardSkill.Utils;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -22,9 +22,10 @@ namespace AlexaSoundboard.SoundboardSkill
 {
     public static class AlexaSoundboardSkill
     {
-        private static UnsplasharpClient _unsplasharpClient;
         private static TraceWriter _log;
+        private static CloudBlobContainer _imageContainer;
         private static IAsyncCollector<string> _soundSearchQueue;
+        private static IAsyncCollector<string> _imageSearchQueue;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
@@ -32,24 +33,25 @@ namespace AlexaSoundboard.SoundboardSkill
             HttpRequestMessage req,
             [Queue("soundsearch")]
             IAsyncCollector<string> soundSearchQueue,
+            [Queue("imagesearch")]
+            IAsyncCollector<string> imageQueue,
             [Blob("sounds")]
-            CloudBlobContainer blobContainer,
+            CloudBlobContainer soundContainer,
+            [Blob("images")]
+            CloudBlobContainer imageContainer,
             TraceWriter log)
         {
             _log = log;
+            _imageContainer = imageContainer;
 
             _log.Info("Alexa Soundboard - Triggerd");
-
-            // create unsplash client to get images
-            var apiKey = GetEnvironmentVariable("UnsplashKey");
-            _unsplasharpClient = new UnsplasharpClient(apiKey);
 
             // get skill request
             var skillRequest = await req.Content.ReadAsAsync<SkillRequest>();
 
             // check for launch request
             if (skillRequest?.Request is LaunchRequest)
-                return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
+                return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("welcome", Statics.WelcomeMessage, false));
 
             // check for intent request
             if (skillRequest?.Request is IntentRequest intentRequest)
@@ -57,70 +59,68 @@ namespace AlexaSoundboard.SoundboardSkill
                 switch (intentRequest.Intent.Name)
                 {
                     case Statics.AmazonStopIntent:
-                        return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("stop", Statics.StopMessage));
+                        return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("stop", Statics.StopMessage));
                     case Statics.AmazonHelpIntent:
-                        return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage, false));
+                        return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("help", Statics.HelpMessage, false));
                     case Statics.AmazonCancelIntent:
-                        return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("cancel", Statics.CancelMessage));
+                        return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
                         _soundSearchQueue = soundSearchQueue;
-                        var soundNames = blobContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntentAsync(intentRequest, soundNames));
+                        _imageSearchQueue = imageQueue;
+                        var soundNames = soundContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
+                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntent(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
-                        var files = blobContainer.ListBlobs().Select(b => b.Uri.OriginalString);
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleRandomSoundIntentAsync(files));
+                        var files = soundContainer.ListBlobs().Select(b => b.Uri.OriginalString);
+                        return req.CreateResponse(HttpStatusCode.OK, HandleRandomSoundIntent(files));
                 }
             }
 
             // return help intent if nothing suits
-            return req.CreateResponse(HttpStatusCode.OK, await CreateRequestResponse("help", Statics.HelpMessage, false));
+            return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("help", Statics.HelpMessage, false));
         }
 
         /// <summary>
         /// Creates a response to handle the Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleSoundIntentAsync(IntentRequest intentRequest, IEnumerable<string> soundNames)
+        private static async Task<SkillResponse> HandleSoundIntent(IntentRequest intentRequest, IEnumerable<string> soundNames)
         {
             var slots = intentRequest.Intent.Slots;
             if (!slots.ContainsKey("sound"))
-                return await CreateRequestResponse("error", Statics.NoSoundProvidedMessage);
+                return CreateRequestResponse("error", Statics.NoSoundProvidedMessage);
 
             var soundName = slots["sound"].Value;
             var soundFileName = soundName.AsFileName();
 
             if (IsSoundAvailable(soundFileName, soundNames))
-                return await CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
+                return CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
 
             await _soundSearchQueue.AddAsync(soundName);
+            await _imageSearchQueue.AddAsync(soundName);
 
-            return await CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
+            return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
 
         /// <summary>
         /// Creates a response to handle the Random Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleRandomSoundIntentAsync(IEnumerable<string> files)
+        private static SkillResponse HandleRandomSoundIntent(IEnumerable<string> files)
         {
+            var soundFile = files.PickRandom();
+            var imageName = soundFile.Split('/').Last().Split('.').First();
+
             // get a picture
-            var pictureUrl = await GetPhotoAsync("random");
+            var pictureUrl = GetPhoto(imageName);
 
             // return skill response
             return string.IsNullOrEmpty(pictureUrl)
-                ? GetSkillResponse(string.Format(Statics.RandomSoundMessage, files.PickRandom()), false, useSsml: true)
-                : GetSkillResponse(string.Format(Statics.RandomSoundMessage, files.PickRandom()), false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } }, true);
+                ? GetSkillResponse(string.Format(Statics.RandomSoundMessage, soundFile), false, useSsml: true)
+                : GetSkillResponse(string.Format(Statics.RandomSoundMessage, soundFile), false, new StandardCard { Image = new CardImage { LargeImageUrl = pictureUrl, SmallImageUrl = pictureUrl } }, true);
         }
 
-        /// <summary>
-        /// Gets a random photo from unsplash.com
-        /// </summary>
-        /// <param name="query">Search query</param>
-        private static async Task<string> GetPhotoAsync(string query)
+        private static string GetPhoto(string query)
         {
-            var photo = await _unsplasharpClient.GetRandomPhoto(UnsplasharpClient.Orientation.Squarish, false, query: query);
-
-            return photo.FirstOrDefault() != null
-                ? photo.First().Urls.Regular
-                : string.Empty;
+            var images = _imageContainer.ListBlobs().Cast<CloudBlockBlob>().ToList();
+            return images.FirstOrDefault(i => i.Name.Split('.').First() == query)?.Uri?.OriginalString;
         }
 
         /// <summary>
@@ -138,25 +138,16 @@ namespace AlexaSoundboard.SoundboardSkill
         }
 
         /// <summary>
-        /// Gets the enivronment variable from the settings.
-        /// </summary>
-        /// <param name="name">Name of the setting</param>
-        private static string GetEnvironmentVariable(string name)
-        {
-            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
-        }
-
-        /// <summary>
         /// Creates a SkillResponse with a given message.
         /// </summary>
         /// <param name="searchTerm">Search query for the picture</param>
         /// <param name="message">Text which should be played</param>
         /// <param name="shouldEndSession">Indicates if the session should be closed</param>
         /// <param name="useSsml">Indicates if the text is using SSML or not</param>
-        private static async Task<SkillResponse> CreateRequestResponse(string searchTerm, string message, bool shouldEndSession = true, bool useSsml = false)
+        private static SkillResponse CreateRequestResponse(string searchTerm, string message, bool shouldEndSession = true, bool useSsml = false)
         {
             // get a picture
-            var pictureUrl = await GetPhotoAsync(searchTerm);
+            var pictureUrl = GetPhoto(searchTerm);
 
             // return skill response
             return string.IsNullOrEmpty(pictureUrl)
