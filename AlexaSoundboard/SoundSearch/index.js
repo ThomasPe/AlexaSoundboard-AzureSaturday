@@ -16,12 +16,17 @@ module.exports = function (context, myQueueItem) {
             var $ = cheerio.load(html);
             var count = $('.instant .small-button').length;
             context.log('Sounds found: ' + count);
-            var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
-            context.log("found sound: " + sound);
-            var soundMsg = soundbaseuri + sound + ';' + name;
-            context.log("soundMsg: " + soundMsg);
-            context.bindings.soundLogging = "SoundSearch found " + soundMsg;
-            context.bindings.soundUri = soundMsg;
+            if (count > 0) {
+                var sound = $('.instant .small-button').first().attr('onmousedown').replace("play('/media/sounds/", "").replace("')", "");
+                context.log("found sound: " + sound);
+                var soundMsg = soundbaseuri + sound + ';' + name;
+                context.log("soundMsg: " + soundMsg);
+                context.bindings.soundLogging = "SoundSearch found " + soundMsg;
+                context.bindings.soundUri = soundMsg;
+            } else {
+                context.bindings.soundLogging = "No sound found for " + myQueueItem;
+            }
+
             context.done();
         } else {
             context.log("error: " + error);
