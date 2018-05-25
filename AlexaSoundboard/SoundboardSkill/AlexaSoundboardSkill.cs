@@ -105,7 +105,7 @@ namespace AlexaSoundboard.SoundboardSkill
             _soundQueue.Add(soundName);
             _imageQueue.Add(soundName);
 
-            return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
+            return CreateRequestResponse("error", string.Format(Statics.SoundNotAvailableMessage, soundName), false);
         }
 
         /// <summary>
