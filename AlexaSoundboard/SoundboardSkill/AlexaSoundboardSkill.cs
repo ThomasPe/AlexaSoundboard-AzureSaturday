@@ -24,17 +24,17 @@ namespace AlexaSoundboard.SoundboardSkill
     {
         private static TraceWriter _log;
         private static CloudBlobContainer _imageContainer;
-        private static IAsyncCollector<string> _soundSearchQueue;
-        private static IAsyncCollector<string> _imageSearchQueue;
+        private static ICollector<string> _soundSearchQueue;
+        private static ICollector<string> _imageSearchQueue;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "alexa-soundboard")]
             HttpRequestMessage req,
             [Queue("soundsearch")]
-            IAsyncCollector<string> soundSearchQueue,
+            ICollector<string> soundSearchQueue,
             [Queue("imagesearch")]
-            IAsyncCollector<string> imageQueue,
+            ICollector<string> imageQueue,
             [Blob("sounds")]
             CloudBlobContainer soundContainer,
             [Blob("images")]
@@ -68,7 +68,7 @@ namespace AlexaSoundboard.SoundboardSkill
                         _soundSearchQueue = soundSearchQueue;
                         _imageSearchQueue = imageQueue;
                         var soundNames = soundContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
-                        return req.CreateResponse(HttpStatusCode.OK, await HandleSoundIntent(intentRequest, soundNames));
+                        return req.CreateResponse(HttpStatusCode.OK, HandleSoundIntent(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
                         var files = soundContainer.ListBlobs().Select(b => b.Uri.OriginalString);
                         return req.CreateResponse(HttpStatusCode.OK, HandleRandomSoundIntent(files));
@@ -82,7 +82,7 @@ namespace AlexaSoundboard.SoundboardSkill
         /// <summary>
         /// Creates a response to handle the Sound Intent.
         /// </summary>
-        private static async Task<SkillResponse> HandleSoundIntent(IntentRequest intentRequest, IEnumerable<string> soundNames)
+        private static SkillResponse HandleSoundIntent(IntentRequest intentRequest, IEnumerable<string> soundNames)
         {
             var slots = intentRequest.Intent.Slots;
             if (!slots.ContainsKey("sound"))
@@ -94,8 +94,8 @@ namespace AlexaSoundboard.SoundboardSkill
             if (IsSoundAvailable(soundFileName, soundNames))
                 return CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
 
-            await _soundSearchQueue.AddAsync(soundName);
-            await _imageSearchQueue.AddAsync(soundName);
+            _soundSearchQueue.Add(soundName);
+            _imageSearchQueue.Add(soundName);
 
             return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
