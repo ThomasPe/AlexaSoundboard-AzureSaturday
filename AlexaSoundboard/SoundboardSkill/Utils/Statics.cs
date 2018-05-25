@@ -19,7 +19,7 @@
         public static string WelcomeMessage = "Hi!";
 
         public static string NoSoundProvidedMessage = "I didn't catch the sound you want to hear. Please try again.";
-        public static string SoundNotAvailableMessage = "Currently this sound isn't available. But I will try to get it. Please try it again later.";
+        public static string SoundNotAvailableMessage = "Currently the sound '{0}' isn't available. But I will try to get it. Please try it again later.";
         public static string SoundMessage = $"<speak><audio src='{SoundUrl}' /></speak>";
         public static string RandomSoundMessage = "<speak><audio src='{0}' /></speak>";        
     }

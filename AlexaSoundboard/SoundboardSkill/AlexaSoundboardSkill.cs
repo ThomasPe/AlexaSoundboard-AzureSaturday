@@ -105,7 +105,9 @@ namespace AlexaSoundboard.SoundboardSkill
             _soundQueue.Add(soundName);
             _imageQueue.Add(soundName);
 
-            return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
+            _loggingQueue.Add($"AlexaSoundboardSkill - Sound Not Found: {soundName}");
+
+            return CreateRequestResponse("error", string.Format(Statics.SoundNotAvailableMessage, soundName), false);
         }
 
         /// <summary>
