@@ -8,7 +8,7 @@ using System.Net;
 using System.Diagnostics;
 using System.IO;
 
-public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
+public static void Run(string myQueueItem, ICollector<string> logging, TraceWriter log)
 {
     log.Info($"SoundDonwload started: {myQueueItem}");
     string url = myQueueItem.Split(';').First();
@@ -25,6 +25,8 @@ public static void Run(string myQueueItem, IBinder binder, TraceWriter log)
     blobContainer.CreateIfNotExists();
     var newBlockBlob = blobContainer.GetBlockBlobReference(name + ".mp3");
     newBlockBlob.StartCopy(new Uri(url));
+
+    logging.Add("SoundDonwload: " + url);    
 }
 
 public static string GetEnvironmentVariable(string name)
