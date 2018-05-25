@@ -24,17 +24,20 @@ namespace AlexaSoundboard.SoundboardSkill
     {
         private static TraceWriter _log;
         private static CloudBlobContainer _imageContainer;
-        private static ICollector<string> _soundSearchQueue;
-        private static ICollector<string> _imageSearchQueue;
+        private static ICollector<string> _soundQueue;
+        private static ICollector<string> _imageQueue;
+        private static ICollector<string> _loggingQueue;
 
         [FunctionName("AlexaSoundboardSkill")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "alexa-soundboard")]
             HttpRequestMessage req,
             [Queue("soundsearch")]
-            ICollector<string> soundSearchQueue,
+            ICollector<string> soundQueue,
             [Queue("imagesearch")]
             ICollector<string> imageQueue,
+            [Queue("imagesearch")]
+            ICollector<string> loggingQueue,
             [Blob("sounds")]
             CloudBlobContainer soundContainer,
             [Blob("images")]
@@ -42,6 +45,7 @@ namespace AlexaSoundboard.SoundboardSkill
             TraceWriter log)
         {
             _log = log;
+            _loggingQueue = loggingQueue;
             _imageContainer = imageContainer;
 
             _log.Info("Alexa Soundboard - Triggerd");
@@ -65,8 +69,8 @@ namespace AlexaSoundboard.SoundboardSkill
                     case Statics.AmazonCancelIntent:
                         return req.CreateResponse(HttpStatusCode.OK, CreateRequestResponse("cancel", Statics.CancelMessage));
                     case Statics.SoundIntent:
-                        _soundSearchQueue = soundSearchQueue;
-                        _imageSearchQueue = imageQueue;
+                        _soundQueue = soundQueue;
+                        _imageQueue = imageQueue;
                         var soundNames = soundContainer.ListBlobs().Cast<CloudBlockBlob>().Select(b => b.Name.Split('.').First());
                         return req.CreateResponse(HttpStatusCode.OK, HandleSoundIntent(intentRequest, soundNames));
                     case Statics.RandomSoundIntent:
@@ -92,10 +96,14 @@ namespace AlexaSoundboard.SoundboardSkill
             var soundFileName = soundName.AsFileName();
 
             if (IsSoundAvailable(soundFileName, soundNames))
-                return CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
+            {
+                _loggingQueue.Add($"AlexaSoundboardSkill - Playing: {soundName}");
 
-            _soundSearchQueue.Add(soundName);
-            _imageSearchQueue.Add(soundName);
+                return CreateRequestResponse(soundFileName, string.Format(Statics.SoundMessage, soundFileName), false, true);
+            }
+
+            _soundQueue.Add(soundName);
+            _imageQueue.Add(soundName);
 
             return CreateRequestResponse("error", Statics.SoundNotAvailableMessage);
         }
@@ -107,6 +115,8 @@ namespace AlexaSoundboard.SoundboardSkill
         {
             var soundFile = files.PickRandom();
             var imageName = soundFile.Split('/').Last().Split('.').First();
+
+            _loggingQueue.Add($"AlexaSoundboardSkill - Playing: {imageName}");
 
             // get a picture
             var pictureUrl = GetPhoto(imageName);
