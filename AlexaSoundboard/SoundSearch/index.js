@@ -6,7 +6,7 @@ module.exports = function (context, myQueueItem) {
     const soundbaseuri = 'https://www.myinstants.com/media/sounds/';
 
     var query = myQueueItem.split(' ').join('+');
-    var name = myQueueItem.split(' ').join('');
+    var name = myQueueItem.split(' ').join('').toLowerCase();
     context.log('query: ' + query);
     context.log('name: ' + name);
     request('https://www.myinstants.com/search/?name=' + query, function (error, response, html) {
