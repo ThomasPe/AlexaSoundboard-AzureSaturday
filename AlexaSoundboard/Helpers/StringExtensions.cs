@@ -18,7 +18,7 @@ namespace AlexaSoundboard.Helpers
             foreach (var c in normalizedString)
             {
                 var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
-                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark && !char.IsPunctuation(c))
                     stringBuilder.Append(c);
             }
 
